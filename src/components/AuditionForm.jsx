@@ -6,7 +6,6 @@ const AuditionForm = () => { // AuditionForm is the Function
         name: "",
         age: "",
         email: "",
-        gender: "",
         voicerange: ""
     });
 
@@ -16,24 +15,47 @@ const handleChange = (e) => {
         ...formData, // Copy the existing formData
         [name]: value,
     });
-}
+};
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     if(!formData.voicerange) {
         alert("Please select possible voicerange before Submitting!");
+        return;
     }
 
-    console.log("Form Data Submitted: ", formData);
+    try {
+        const response = await fetch("https://gevanm.azurewebsites.net/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        });
 
-    setFormData({
-        name: "",
-        age: "",
-        email: "",
-        voicerange: ""
-    });
-};
+        if(response.ok){
+            const result = await response.json();
+            alert("Form is submitted successfully");
+            console.log("API Response:", result);
+            console.log("Form submission was successful");
+
+            //reset the form
+            setFormData({
+                name: "",
+                age: "",
+                email: "",
+                voicerange: "Select your possible voicerange"
+            });
+        } else {
+            alert("Failed to submit form. Please try again");
+            console.error("API Error", response.statusText);       
+        }
+    } catch (error){
+        alert("An error occured while submitting the form.");
+        console.error("error", error);
+    };
+}
 
 return (
     <div className = "form-container">
